@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>World Explorer - Currency Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #eeeeee;
+            display: flex;
+        }
+
+        
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            position: fixed;
+            height: 100vh;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #e0e0e0;
+        }
+
+        
+        .main-content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .container h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .exchange-box {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .amount-box, .currency-selectors {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        label {
+            min-width: 80px;
+            display: inline-block;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            flex: 1;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        button {
+            padding: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+   
+    <div class="sidebar">
+        <h1>Jom La Travel!</h1>
+        <ul>
+            <li><a href="travel.html"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><a href="country.html"><i class="fa-solid fa-magnifying-glass"></i> Explore Country</a></li>
+            <li><a href="itenarary.html"><i class="fa-solid fa-book"></i> My Itinerary</a></li>
+            <li><a href="money.html"><i class="fa-solid fa-money-bill-transfer"></i> Currency Exchange</a></li>
+        </ul>
+    </div>
+
+  
+    <div class="main-content">
+        <div class="container">
+            <h2>Currency Exchange Calculator</h2>
+            <div class="exchange-box">
+                <div class="amount-box">
+                    <label for="amount">Amount:</label>
+                    <input type="number" id="amount" value="1">
+                </div>
+                
+                <div class="currency-selectors">
+                    <label for="from">From:</label>
+                    <select id="from"></select>
+                </div>
+                
+                <div class="currency-selectors">
+                    <label for="to">To:</label>
+                    <select id="to"></select>
+                </div>
+                
+                <button id="convert">Convert Currency</button>
+                
+                <div class="result" id="result">
+                    <p>1 USD = 1 USD</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    
+    const API_KEY = '66493090af6d63b52312a9a8';
+    const BASE_URL = 'https://v6.exchangerate-api.com/v6/';
+
+    const fromCurrency = document.getElementById('from');
+    const toCurrency = document.getElementById('to');
+    const amount = document.getElementById('amount');
+    const convertBtn = document.getElementById('convert');
+    const result = document.getElementById('result');
+
+    
+    async function fetchCurrencies() {
+        try {
+            const response = await fetch(`${BASE_URL}${API_KEY}/codes`);
+            const data = await response.json();
+
+            if(data.result === 'success') {
+                return data.supported_codes;
+            } else {
+                throw new Error('Unable to fetch currencies');
+            }
+        } catch (error) {
+            console.error('Error fetching currencies:', error);
+            return [];
+        }
+    }
+
+    
+    async function populateCurrencies() {
+        const currencies = await fetchCurrencies();
+
+        currencies.forEach(([code, name]) => {
+            const option1 = document.createElement('option');
+            const option2 = document.createElement('option');
+            
+            option1.value = code;
+            option1.text = `${code} - ${name}`;
+            option2.value = code;
+            option2.text = `${code} - ${name}`;
+            
+            fromCurrency.add(option1);
+            toCurrency.add(option2);
+        });
+        
+        
+        fromCurrency.value = 'USD';
+        toCurrency.value = 'EUR';
+    }
+
+    
+    async function convertCurrency() {
+        const fromValue = fromCurrency.value;
+        const toValue = toCurrency.value;
+        const amountValue = amount.value;
+
+        try {
+            const response = await fetch(`${BASE_URL}${API_KEY}/pair/${fromValue}/${toValue}/${amountValue}`);
+            const data = await response.json();
+
+            if(data.result === 'success') {
+                const rate = data.conversion_rate;
+                const convertedAmount = data.conversion_result;
+                
+                result.innerHTML = `
+                    <p>${amountValue} ${fromValue} = ${convertedAmount.toFixed(2)} ${toValue}</p>
+                    <p>1 ${fromValue} = ${rate} ${toValue}</p>
+                `;
+            } else {
+                throw new Error('Unable to convert currency');
+            }
+        } catch (error) {
+            result.innerHTML = `<p>Error: ${error.message}</p>`;
+        }
+    }
+
+    
+    convertBtn.addEventListener('click', convertCurrency);
+    amount.addEventListener('keyup', (e) => {
+        if(e.key === 'Enter') convertCurrency();
+    });
+
+    
+    populateCurrencies();
+    </script>
+</body>
+</html>

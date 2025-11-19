@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Jom La Travel - Trip Planner</title>
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #eeeeee;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 7px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .trip-card {
+            background: #f4f4f4;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover-photo {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            position: fixed;
+            height: 100vh;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            padding: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .sidebar ul li:hover {
+            background-color: #e0e0e0;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        #tripForm {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #tripForm h2 {
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        #formButtons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+   
+    <div class="sidebar">
+        <h1>Jom La Travel!</h1>
+        <ul>
+            <li><a href="travel.html"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><a href="explore-country.html"><i class="fa-solid fa-magnifying-glass"></i> Explore Country</a></li>
+            <li><a href="itenarary.html"><i class="fa-solid fa-book"></i> My Itinerary</a></li>
+            <li><a href="money.html"><i class="fa-solid fa-money-bill-transfer"></i> Currency Exchange</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <div class="container">
+            <h1>Trip Planner</h1>
+            <button id="addTripBtn">Add Trip</button>
+            <div id="tripForm">
+                <h2 id="formTitle">Add New Trip</h2>
+                <form id="newTripForm">
+                    <input type="text" id="tripName" placeholder="Trip Name" required>
+                    <input type="text" id="country" placeholder="Country" list="countries" required>
+                    <datalist id="countries"></datalist>
+                    <input type="number" id="days" placeholder="Number of Days" min="1" required>
+                    <input type="date" id="startDate" required>
+                    <textarea id="thingsToDo" placeholder="Things to Do"></textarea>
+                    <input type="file" id="coverPhoto" accept="image/*">
+                    <div id="formButtons">
+                        <button type="submit" id="submitBtn">Create Trip</button>
+                        <button type="button" id="cancelBtn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <div id="tripList"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addTripBtn = document.getElementById('addTripBtn');
+            const tripForm = document.getElementById('tripForm');
+            const newTripForm = document.getElementById('newTripForm');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const tripList = document.getElementById('tripList');
+            const countryDatalist = document.getElementById('countries');
+            const formTitle = document.getElementById('formTitle');
+            const submitBtn = document.getElementById('submitBtn');
+    
+            let trips = [];
+            let countries = [];
+            let editingTripId = null;
+    
+            
+            loadTrips();
+    
+            // Fetch countries for datalist
+            fetch('https://restcountries.com/v3.1/all')
+                .then(response => response.json())
+                .then(data => {
+                    countries = data.map(country => ({
+                        name: country.name.common,
+                        flag: country.flags.svg
+                    }));
+                    updateCountryDatalist();
+                })
+                .catch(error => console.error('Error fetching countries:', error));
+    
+            function updateCountryDatalist() {
+                countryDatalist.innerHTML = countries.map(country => 
+                    `<option value="${country.name}">`
+                ).join('');
+            }
+    
+            function showForm(isEditing = false) {
+                tripForm.style.display = 'block';
+                formTitle.textContent = isEditing ? 'Edit Trip' : 'Add New Trip';
+                submitBtn.textContent = isEditing ? 'Update Trip' : 'Create Trip';
+            }
+    
+            function hideForm() {
+                tripForm.style.display = 'none';
+                newTripForm.reset();
+                editingTripId = null;
+                formTitle.textContent = 'Add New Trip';
+                submitBtn.textContent = 'Create Trip';
+            }
+    
+            addTripBtn.addEventListener('click', () => {
+                showForm(false);
+            });
+    
+            cancelBtn.addEventListener('click', hideForm);
+    
+            newTripForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const countryName = document.getElementById('country').value;
+                const country = countries.find(c => c.name === countryName);
+    
+                const tripData = {
+                    tripName: document.getElementById('tripName').value,
+                    country: countryName,
+                    flag: country ? country.flag : null, // Save the flag URL in trip data
+                    days: parseInt(document.getElementById('days').value),
+                    startDate: document.getElementById('startDate').value,
+                    thingsToDo: document.getElementById('thingsToDo').value,
+                };
+    
+                const coverPhotoFile = document.getElementById('coverPhoto').files[0];
+    
+                const processTrip = (photoData) => {
+                    if (editingTripId) {
+                        const tripIndex = trips.findIndex(t => t.id === editingTripId);
+                        if (tripIndex !== -1) {
+                            trips[tripIndex] = {
+                                ...trips[tripIndex],
+                                ...tripData,
+                                coverPhoto: photoData || trips[tripIndex].coverPhoto
+                            };
+                        }
+                    } else {
+                        trips.push({
+                            id: Date.now(),
+                            ...tripData,
+                            coverPhoto: photoData
+                        });
+                    }
+                    updateTripList();
+                    saveTrips(); 
+                    hideForm();
+                };
+    
+                if (coverPhotoFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        processTrip(event.target.result);
+                    };
+                    reader.readAsDataURL(coverPhotoFile);
+                } else {
+                    processTrip(null);
+                }
+            });
+    
+            function updateTripList() {
+                tripList.innerHTML = trips.map(trip => `
+                    <div class="trip-card" data-id="${trip.id}">
+                        <h3>${trip.tripName}</h3>
+                        <p>Country: ${trip.country} ${trip.flag ? `<img src="${trip.flag}" alt="Flag" class="flag" width="20">` : ''}</p>
+                        <p>Days: ${trip.days}</p>
+                        <p>Start Date: ${trip.startDate}</p>
+                        <p>End Date: ${calculateEndDate(trip.startDate, trip.days)}</p>
+                        <p>Things to Do: ${trip.thingsToDo}</p>
+                        ${trip.coverPhoto ? `<img src="${trip.coverPhoto}" alt="Cover Photo" class="cover-photo">` : ''}
+                        <button onclick="editTrip(${trip.id})">Edit</button>
+                        <button onclick="deleteTrip(${trip.id})">Delete</button>
+                    </div>
+                `).join('');
+            }
+    
+            function calculateEndDate(startDate, days) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + days);
+                return date.toISOString().split('T')[0];
+            }
+    
+            
+            function saveTrips() {
+                localStorage.setItem('trips', JSON.stringify(trips));
+            }
+    
+            
+            function loadTrips() {
+                const storedTrips = localStorage.getItem('trips');
+                if (storedTrips) {
+                    trips = JSON.parse(storedTrips);
+                    updateTripList();
+                }
+            }
+    
+            window.editTrip = (tripId) => {
+                const trip = trips.find(t => t.id === tripId);
+                if (trip) {
+                    editingTripId = tripId;
+                    document.getElementById('tripName').value = trip.tripName;
+                    document.getElementById('country').value = trip.country;
+                    document.getElementById('days').value = trip.days;
+                    document.getElementById('startDate').value = trip.startDate;
+                    document.getElementById('thingsToDo').value = trip.thingsToDo;
+                    showForm(true);
+                }
+            };
+    
+            window.deleteTrip = (tripId) => {
+                trips = trips.filter(t => t.id !== tripId);
+                updateTripList();
+                saveTrips(); 
+            };
+        });
+    </script>
+    
+
+</body>
+</html>
