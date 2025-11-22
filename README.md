@@ -72,15 +72,19 @@ WorldExplorer is a cross-platform desktop application designed to assist travele
 ## 📸 Screenshots
 
 ### Explore Countries
+<img src="screenshot/country.webp" width="700">
 *Browse and search countries with detailed information cards*
 
 ### Country Details
+<img src="screenshot/country details.webp" width="700">
 *View comprehensive country information with interactive maps*
 
 ### Trip Planner
+<img src="screenshot/iternary.webp" width="700">
 *Create and manage travel itineraries with ease*
 
 ### Currency Exchange
+<img src="screenshot/currency.webp" width="700">
 *Calculate currency conversions for budget planning*
 
 > **Note:** Screenshots showcase the clean, intuitive user interface designed for seamless travel planning.
